@@ -7,4 +7,8 @@ song = api.search_song("The Glorious Five", "Logic")
 print("Lyrics")
 print(song.lyrics)
 print("Total characters: ", len(song.lyrics))
-print("Word count: ", len(song.lyrics.split()))
+words = song.lyrics.split()
+print("Word count: ", len(words))
+
+def censorLyrics(lyricsArray):
+    for word in lyricsArray
