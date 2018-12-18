@@ -4,7 +4,7 @@ with open(".genius_key", "r") as myfile:
 
 def cleanLyrics(lyrics):
     cleanedLyrics = lyrics.replace("Fuck", "F***")
-    cleanedLyrics = lyrics.replace("fuck", "f***")
+    cleanedLyrics = cleanedLyrics.replace("fuck", "f***")
     cleanedLyrics = cleanedLyrics.replace("Shit", "S***")
     cleanedLyrics = cleanedLyrics.replace("shit", "s***")
     return cleanedLyrics
