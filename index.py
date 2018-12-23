@@ -19,15 +19,29 @@ def getWordFrequency(lyrics):
             wordsMap[word] = 1
     return wordsMap
 
+artistName = "Bazzi"
+songName = "Beautiful"
 api = genius.Genius(genius_key)
-song = api.search_song("The Glorious Five", "Logic")
+song = api.search_song(songName, artistName)
 
 print("Lyrics")
 print(cleanLyrics.censor(song.lyrics))
 
 lyricsStats = getLyricsStats(song.lyrics)
-print("Total characters: ", lyricsStats["charsNum"])
-print("Word count: ", lyricsStats["wordsNum"])
-lyricWords = song.lyrics.split()
+print("Total characters:", lyricsStats["charsNum"])
 
-print("Word frequency: ", getWordFrequency(lyricWords))
+lyricWords = song.lyrics.split()
+wordMap = getWordFrequency(lyricWords)
+print("Total words: %s (%s unique)" % (lyricsStats["wordsNum"], len(wordMap)))
+
+print("Similies used in this song:", wordMap["like"])
+lyricLines = song.lyrics.split("\n")
+if len(lyricLines) > 0:
+    print("Lines with similies in them:")
+    similieNum = 0
+    for line in lyricLines:
+        if "like" in line:
+            similieNum += 1
+            print("%s. %s" % (similieNum, line))
+
+# print("Word frequency: ", getWordFrequency(lyricWords))
