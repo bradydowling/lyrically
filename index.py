@@ -33,19 +33,19 @@ song = api.search_song(song_name, artist_name)
 print("Lyrics")
 print(clean_lyrics.censor(song.lyrics))
 
-lyricsStats = get_lyrics_stats(song.lyrics)
-print("Total characters:", lyricsStats["chars_num"])
+lyrics_stats = get_lyrics_stats(song.lyrics)
+print("Total characters:", lyrics_stats["chars_num"])
 
-lyricWords = song.lyrics.split()
-wordMap = get_word_frequency(lyricWords)
-print("Total words: %s (%s unique)" % (lyricsStats["words_num"], len(wordMap)))
+lyric_words = song.lyrics.split()
+word_map = get_word_frequency(lyric_words)
+print("Total words: %s (%s unique)" % (lyrics_stats["words_num"], len(word_map)))
 
-print("Similes used in this song:", wordMap["like"])
-lyricLines = song.lyrics.split("\n")
-if len(lyricLines) > 0:
+print("Similes used in this song:", word_map["like"])
+lyric_lines = song.lyrics.split("\n")
+if len(lyric_lines) > 0:
     print("Lines with similes in them:")
     simile_num = 0
-    for line in lyricLines:
+    for line in lyric_lines:
         if "like" in line:
             simile_num += 1
             print("%s. %s" % (simile_num, line))
