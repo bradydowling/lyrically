@@ -8,9 +8,10 @@ with open(".genius_key", "r") as myfile:
 
 
 def get_lyrics_stats(lyrics):
+    expletives = clean_lyrics.count_expletives(lyrics)
     characters = len(lyrics)
     words = len(lyrics.split())
-    stats = {"chars_num": characters, "words_num": words}
+    stats = {"chars_num": characters, "words_num": words, "expletives_num": expletives}
     return stats
 
 
@@ -48,17 +49,19 @@ def main(artist, song, clean, lyrics, stats):
         if lyrics:
             click.echo("Lyrics:")
             if clean:
-                click.echo(clean_lyrics.censor(song_info.lyrics))
+                lyrics_string = clean_lyrics.censor(song_info.lyrics)
             else:
-                click.echo(song_info.lyrics)
+                lyrics_string = song_info.lyrics
+            click.echo(lyrics_string)
 
-        if stats:
+        if stats == "True" or stats == "true" or stats == "TRUE":
             lyrics_stats = get_lyrics_stats(song_info.lyrics)
-            click.echo("Total characters:", lyrics_stats["chars_num"])
+            print("Total characters:", lyrics_stats["chars_num"])
 
             lyric_words = song_info.lyrics.split()
             word_map = get_word_frequency(lyric_words)
             click.echo("Total words: %s (%s unique)" % (lyrics_stats["words_num"], len(word_map)))
+            click.echo("Total expletives: %s" % lyrics_stats["expletives_num"])
 
             lyric_lines = song_info.lyrics.split("\n")
             simile_lines = list()
@@ -67,17 +70,17 @@ def main(artist, song, clean, lyrics, stats):
                     if "like" in line and line not in simile_lines:
                         simile_lines.append(line)
 
-            click.echo("Similes used in this song:", len(simile_lines))
-            click.echo("Lines with similes in them:")
+            print("Similes used in this song:", len(simile_lines))
+            print("Lines with similes in them:")
             for simile_num, simile_line in enumerate(simile_lines):
-                click.echo("%s. %s" % (simile_num + 1, simile_line))
+                print("%s. %s" % (simile_num + 1, simile_line))
 
-            click.echo("Words by frequency:")
+            print("Words by frequency:")
             word_map_sorted = sorted(word_map.items(), key=lambda kv: kv[1])
             word_map_sorted.reverse()
             word_num = 1
             for word_key, word_frequency in word_map_sorted:
-                click.echo("%s). %s - %s" % (word_num, word_key, word_frequency))
+                print("%s). %s - %s" % (word_num, word_key, word_frequency))
                 word_num += 1
                 if word_num > 10:
                     break
