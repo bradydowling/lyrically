@@ -71,16 +71,16 @@ def main(artist, song, clean, lyrics, stats):
                         simile_lines.append(line)
 
             print("Similes used in this song:", len(simile_lines))
-            print("Lines with similes in them:")
+            click.echo("Lines with similes in them:")
             for simile_num, simile_line in enumerate(simile_lines):
-                print("%s. %s" % (simile_num + 1, simile_line))
+                click.echo("%s. %s" % (simile_num + 1, simile_line))
 
-            print("Words by frequency:")
+            click.echo("Words by frequency:")
             word_map_sorted = sorted(word_map.items(), key=lambda kv: kv[1])
             word_map_sorted.reverse()
             word_num = 1
             for word_key, word_frequency in word_map_sorted:
-                print("%s). %s - %s" % (word_num, word_key, word_frequency))
+                click.echo("%s). %s - %s" % (word_num, word_key, word_frequency))
                 word_num += 1
                 if word_num > 10:
                     break
