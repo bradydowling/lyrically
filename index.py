@@ -1,7 +1,7 @@
 import lyricsgenius as genius
 import clean_lyrics
 import pronouncing
-import sys
+import click
 
 with open(".genius_key", "r") as myfile:
     genius_key = myfile.read().replace("\n", "")
@@ -25,33 +25,70 @@ def get_word_frequency(lyrics):
     return words_map
 
 
-artist_name = "Logic"
-song_name = "Under Pressure"
-api = genius.Genius(genius_key)
-song = api.search_song(song_name, artist_name)
+def get_longest_word(lyrics):
+    longest_word = lyrics[0]
+    for word in lyrics:
+        if len(word) > len(longest_word):
+            longest_word = word
+    return longest_word
 
-print("Lyrics")
-print(clean_lyrics.censor(song.lyrics))
 
-lyrics_stats = get_lyrics_stats(song.lyrics)
-print("Total characters:", lyrics_stats["chars_num"])
+@click.command()
+@click.argument("artist")
+@click.argument("song")
+@click.option("--clean", default=True, help="Whether the lyrics should be censored/cleaned")
+@click.option("--lyrics", default=True, help="Whether the lyrics should be output")
+@click.option("--stats", default=False, help="Whether the statistical analysis of the lyrics should be output")
+def main(artist, song, clean, lyrics, stats):
+    api = genius.Genius(genius_key)
+    song_info = api.search_song(song, artist)
+    try:
+        hasattr(song_info, "lyrics")
+        # Todo: Remove [Hook], [Verse 1], etc
+        if lyrics:
+            click.echo("Lyrics:")
+            if clean:
+                click.echo(clean_lyrics.censor(song_info.lyrics))
+            else:
+                click.echo(song_info.lyrics)
 
-lyric_words = song.lyrics.split()
-word_map = get_word_frequency(lyric_words)
-print("Total words: %s (%s unique)" % (lyrics_stats["words_num"], len(word_map)))
+        if stats:
+            lyrics_stats = get_lyrics_stats(song_info.lyrics)
+            click.echo("Total characters:", lyrics_stats["chars_num"])
 
-print("Similes used in this song:", word_map["like"])
-lyric_lines = song.lyrics.split("\n")
-if len(lyric_lines) > 0:
-    print("Lines with similes in them:")
-    simile_num = 0
-    for line in lyric_lines:
-        if "like" in line:
-            simile_num += 1
-            print("%s. %s" % (simile_num, line))
+            lyric_words = song_info.lyrics.split()
+            word_map = get_word_frequency(lyric_words)
+            click.echo("Total words: %s (%s unique)" % (lyrics_stats["words_num"], len(word_map)))
 
-# print("Word frequency: ", getWordFrequency(lyricWords))
+            lyric_lines = song_info.lyrics.split("\n")
+            simile_lines = list()
+            if len(lyric_lines) > 0:
+                for line in lyric_lines:
+                    if "like" in line and line not in simile_lines:
+                        simile_lines.append(line)
 
-# Todo: [Hook], [Verse 1], etc
+            click.echo("Similes used in this song:", len(simile_lines))
+            click.echo("Lines with similes in them:")
+            for simile_num, simile_line in enumerate(simile_lines):
+                click.echo("%s. %s" % (simile_num + 1, simile_line))
 
-print(pronouncing.rhymes("player"))
+            click.echo("Words by frequency:")
+            word_map_sorted = sorted(word_map.items(), key=lambda kv: kv[1])
+            word_map_sorted.reverse()
+            word_num = 1
+            for word_key, word_frequency in word_map_sorted:
+                click.echo("%s). %s - %s" % (word_num, word_key, word_frequency))
+                word_num += 1
+                if word_num > 10:
+                    break
+
+            # Todo: Import syllabic counters
+            # Todo: See which lines rhyme with each other
+
+            # click.echo(pronouncing.rhymes("player"))
+    except AttributeError:
+        return click.echo("No songs found with this info")
+
+
+if __name__ == "__main__":
+    main()
