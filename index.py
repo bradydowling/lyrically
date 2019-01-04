@@ -1,6 +1,7 @@
 import lyricsgenius as genius
 import clean_lyrics
 import pronouncing
+import subprocess
 import click
 
 with open(".genius_key", "r") as myfile:
@@ -33,6 +34,11 @@ def get_longest_word(lyrics):
             longest_word = word
     return longest_word
 
+def get_spotify_song():
+    command = "osascript getCurrentSong.AppleScript"
+    spotify_song = subprocess.check_output(["/bin/bash", "-c", command]).decode("utf-8")
+    return spotify_song
+
 
 @click.command()
 @click.argument("artist")
@@ -41,6 +47,7 @@ def get_longest_word(lyrics):
 @click.option("--lyrics", default=True, help="Whether the lyrics should be output")
 @click.option("--stats", default=False, help="Whether the statistical analysis of the lyrics should be output")
 def main(artist, song, clean, lyrics, stats):
+    print(get_spotify_song())
     api = genius.Genius(genius_key)
     song_info = api.search_song(song, artist)
     try:
