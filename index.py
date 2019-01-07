@@ -34,25 +34,33 @@ def get_longest_word(lyrics):
             longest_word = word
     return longest_word
 
+
 def get_spotify_song():
     command = "osascript getCurrentSong.AppleScript"
-    spotify_song = subprocess.check_output(["/bin/bash", "-c", command]).decode("utf-8")
+    spotify_song_string = subprocess.check_output(["/bin/bash", "-c", command]).decode("utf-8")
+    # TODO: handle no Spotify song
+    spotify_song = {"song": spotify_song_string.split("^@^")[1].split(" - ")[0], "artist": spotify_song_string.split("^@^")[0]}
     return spotify_song
 
 
 @click.command()
-@click.argument("artist")
-@click.argument("song")
+@click.option("--artist", help="Artist of the song to search for")
+@click.option("--song", help="Song title to search for")
 @click.option("--clean", default=True, help="Whether the lyrics should be censored/cleaned")
 @click.option("--lyrics", default=True, help="Whether the lyrics should be output")
 @click.option("--stats", default=False, help="Whether the statistical analysis of the lyrics should be output")
 def main(artist, song, clean, lyrics, stats):
-    print(get_spotify_song())
-    api = genius.Genius(genius_key)
-    song_info = api.search_song(song, artist)
+    spotify_song = get_spotify_song()["song"]
+    spotify_artist = get_spotify_song()["artist"]
+    api = genius.Genius(genius_key, remove_section_headers=True)
+    if spotify_song and spotify_artist:
+        song_info = api.search_song(spotify_song, spotify_artist)
+    elif song and artist:
+        song_info = api.search_song(song, artist)
+    else:
+        return click.echo("No artist and song title found, try playing and song in Spotify first")
     try:
         hasattr(song_info, "lyrics")
-        # Todo: Remove [Hook], [Verse 1], etc
         if lyrics:
             click.echo("Lyrics:")
             if clean:
