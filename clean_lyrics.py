@@ -1,5 +1,6 @@
 expletives = ["Fuck", "fuck", "Shit", "shit", "pussy"]
 
+# TODO: Make into a module on PYPI called pottytalk
 
 def censor(lyrics):
     cleaned_lyrics = lyrics.replace("Fuck", "F***")

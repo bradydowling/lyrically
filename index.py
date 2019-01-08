@@ -1,8 +1,10 @@
 import lyricsgenius as genius
 import clean_lyrics
 import pronouncing
+import readability
 import subprocess
 import click
+import re
 
 with open(".genius_key", "r") as myfile:
     genius_key = myfile.read().replace("\n", "")
@@ -16,22 +18,29 @@ def get_lyrics_stats(lyrics):
     return stats
 
 
+def strip_nonalpha_chars(word):
+    return re.sub(r'[\[\]\(\)\,]', '', word)
+
+
 def get_word_frequency(lyrics):
     # need to sort and cleanup this dict
     words_map = dict()
     for word in lyrics:
-        if word in words_map:
-            words_map[word] += 1
+        plain_word = strip_nonalpha_chars(word)
+        if plain_word in words_map:
+            words_map[plain_word] += 1
         else:
-            words_map[word] = 1
+            words_map[plain_word] = 1
     return words_map
 
 
 def get_longest_word(lyrics):
-    longest_word = lyrics[0]
-    for word in lyrics:
-        if len(word) > len(longest_word):
-            longest_word = word
+    lyric_words = lyrics.split()
+    longest_word = ""
+    for word in lyric_words:
+        plain_word = strip_nonalpha_chars(word)
+        if len(plain_word) > len(longest_word):
+            longest_word = plain_word
     return longest_word
 
 
@@ -86,10 +95,17 @@ def main(artist, song, clean, lyrics, stats):
                         simile_lines.append(line)
 
             print("Similes used in this song:", len(simile_lines))
-            click.echo("Lines with similes in them:")
-            for simile_num, simile_line in enumerate(simile_lines):
-                click.echo("%s. %s" % (simile_num + 1, simile_line))
+            if len(simile_lines) > 0:
+                click.echo("Lines with similes in them:")
+                for simile_num, simile_line in enumerate(simile_lines):
+                    click.echo("%s. %s" % (simile_num + 1, simile_line))
 
+            if clean:
+                longest_word = clean_lyrics.censor(get_longest_word(song_info.lyrics))
+            else:
+                longest_word = get_longest_word(song_info.lyrics)
+
+            click.echo("Longest word: %s (%s letters)" % (longest_word, len(longest_word)))
             click.echo("Words by frequency:")
             word_map_sorted = sorted(word_map.items(), key=lambda kv: kv[1])
             word_map_sorted.reverse()
@@ -100,8 +116,14 @@ def main(artist, song, clean, lyrics, stats):
                 if word_num > 10:
                     break
 
-            # Todo: Import syllabic counters
-            # Todo: See which lines rhyme with each other
+            results = readability.getmeasures(song_info.lyrics, lang='en')
+            print("Grade reading level: %s" % results['readability grades']['Kincaid'])
+
+            # TODO: Import syllabic counters
+            # TODO: Show longest/most complex words
+            # TODO: See which lines rhyme with each other
+            # TODO: Remove parenthetical words or count them with non-parenthesized words
+            # TODO: Add how many lines, stanzas, and words per line/stanza
 
             # click.echo(pronouncing.rhymes("player"))
     except AttributeError:
