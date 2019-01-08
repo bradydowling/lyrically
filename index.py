@@ -120,7 +120,6 @@ def main(artist, song, clean, lyrics, stats):
             print("Grade reading level: %s" % results['readability grades']['Kincaid'])
 
             # TODO: Import syllabic counters
-            # TODO: Show longest/most complex words
             # TODO: See which lines rhyme with each other
             # TODO: Remove parenthetical words or count them with non-parenthesized words
             # TODO: Add how many lines, stanzas, and words per line/stanza
