@@ -62,10 +62,10 @@ def main(artist, song, clean, lyrics, stats):
     spotify_song = get_spotify_song()["song"]
     spotify_artist = get_spotify_song()["artist"]
     api = genius.Genius(genius_key, remove_section_headers=True)
-    if spotify_song and spotify_artist:
-        song_info = api.search_song(spotify_song, spotify_artist)
-    elif song and artist:
+    if song and artist:
         song_info = api.search_song(song, artist)
+    elif spotify_song and spotify_artist:
+        song_info = api.search_song(spotify_song, spotify_artist)
     else:
         return click.echo("No artist and song title found, try playing and song in Spotify first")
     try:
