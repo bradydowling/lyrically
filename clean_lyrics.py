@@ -12,10 +12,14 @@ def censor(lyrics):
     cleaned_lyrics = cleaned_lyrics.replace("pussy", "p****")
     cleaned_lyrics = cleaned_lyrics.replace("Bitch", "B****")
     cleaned_lyrics = cleaned_lyrics.replace("bitch", "b****")
-    cleaned_lyrics = cleaned_lyrics.replace("God", "Gosh")
-    cleaned_lyrics = cleaned_lyrics.replace("god", "gosh")
+    cleaned_lyrics = cleaned_lyrics.replace("my God", "my gosh")
+    cleaned_lyrics = cleaned_lyrics.replace("Oh God", "Oh gosh")
+    cleaned_lyrics = cleaned_lyrics.replace("Goddamn", "Gosh dang")
+    cleaned_lyrics = cleaned_lyrics.replace("God damn", "Gosh dang")
     cleaned_lyrics = cleaned_lyrics.replace("damn", "dang")
     cleaned_lyrics = cleaned_lyrics.replace("Damn", "Dang")
+    cleaned_lyrics = cleaned_lyrics.replace("Ass ", "A** ")
+    cleaned_lyrics = cleaned_lyrics.replace("ass ", "a** ")
     return cleaned_lyrics
 
 
