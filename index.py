@@ -48,8 +48,28 @@ def get_spotify_song():
     command = "osascript getCurrentSong.AppleScript"
     spotify_song_string = subprocess.check_output(["/bin/bash", "-c", command]).decode("utf-8")
     # TODO: handle no Spotify song
-    spotify_song = {"song": spotify_song_string.split("^@^")[1].split(" - ")[0], "artist": spotify_song_string.split("^@^")[0]}
-    return spotify_song
+    # TODO: Trim whitespace (newline) after song name
+    song_title = spotify_song_string.split("^@^")[1].split(" - ")[0]
+    song_title = re.sub(r'\(ft.[^)]*\)', '', song_title)
+    song_title = re.sub(r'\(feat.[^)]*\)', '', song_title)
+    artist_name = spotify_song_string.split("^@^")[0]
+    song_info = {"song": song_title, "artist": artist_name}
+    return song_info
+
+
+def show_similes(lyrics):
+    lyric_lines = lyrics.split("\n")
+    simile_lines = list()
+    if len(lyric_lines) > 0:
+        for line in lyric_lines:
+            if "like" in line and line not in simile_lines:
+                simile_lines.append(line)
+
+    print("Similes used in this song:", len(simile_lines))
+    if len(simile_lines) > 0:
+        click.echo("Lines with similes in them:")
+        for simile_num, simile_line in enumerate(simile_lines):
+            click.echo("%s. %s" % (simile_num + 1, simile_line))
 
 
 @click.command()
@@ -58,7 +78,8 @@ def get_spotify_song():
 @click.option("--clean", default=True, help="Whether the lyrics should be censored/cleaned")
 @click.option("--lyrics", default=True, help="Whether the lyrics should be output")
 @click.option("--stats", default=False, help="Whether the statistical analysis of the lyrics should be output")
-def main(artist, song, clean, lyrics, stats):
+@click.option("--similes", default=False, help="Alpha: Whether to count/list all lines with the word \"like\" in them")
+def main(artist, song, clean, lyrics, stats, similes):
     spotify_song = get_spotify_song()["song"]
     spotify_artist = get_spotify_song()["artist"]
     api = genius.Genius(genius_key, remove_section_headers=True)
@@ -87,19 +108,6 @@ def main(artist, song, clean, lyrics, stats):
             click.echo("Total words: %s (%s unique)" % (lyrics_stats["words_num"], len(word_map)))
             click.echo("Total expletives: %s" % lyrics_stats["expletives_num"])
 
-            lyric_lines = song_info.lyrics.split("\n")
-            simile_lines = list()
-            if len(lyric_lines) > 0:
-                for line in lyric_lines:
-                    if "like" in line and line not in simile_lines:
-                        simile_lines.append(line)
-
-            print("Similes used in this song:", len(simile_lines))
-            if len(simile_lines) > 0:
-                click.echo("Lines with similes in them:")
-                for simile_num, simile_line in enumerate(simile_lines):
-                    click.echo("%s. %s" % (simile_num + 1, simile_line))
-
             if clean:
                 longest_word = clean_lyrics.censor(get_longest_word(song_info.lyrics))
             else:
@@ -115,6 +123,9 @@ def main(artist, song, clean, lyrics, stats):
                 word_num += 1
                 if word_num > 10:
                     break
+
+            if similes:
+                show_similes(song_info.lyrics)
 
             results = readability.getmeasures(song_info.lyrics, lang='en')
             print("Grade reading level: %s" % results['readability grades']['Kincaid'])
