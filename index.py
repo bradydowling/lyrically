@@ -6,6 +6,8 @@ import subprocess
 import click
 import re
 
+# TODO: Add tests
+
 with open(".genius_key", "r") as myfile:
     genius_key = myfile.read().replace("\n", "")
 
@@ -24,6 +26,7 @@ def strip_nonalpha_chars(word):
 
 def get_word_frequency(lyrics):
     # need to sort and cleanup this dict
+    # TODO: Make the whole word lowercase (test against Let Me Hold You)
     words_map = dict()
     for word in lyrics:
         plain_word = strip_nonalpha_chars(word)
@@ -82,11 +85,12 @@ def show_similes(lyrics):
 def main(artist, song, clean, lyrics, stats, similes):
     spotify_song = get_spotify_song()["song"]
     spotify_artist = get_spotify_song()["artist"]
-    api = genius.Genius(genius_key, remove_section_headers=True)
+    api = genius.Genius(genius_key, remove_section_headers=True, skip_non_songs=True, verbose=False)
     if song and artist:
         song_info = api.search_song(song, artist)
     elif spotify_song and spotify_artist:
         song_info = api.search_song(spotify_song, spotify_artist)
+        # TODO: Prevent lists from being returned (test against Beautiful by Bazzi)
     else:
         return click.echo("No artist and song title found, try playing and song in Spotify first")
     try:
